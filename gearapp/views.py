@@ -95,7 +95,7 @@ def download_gear_value(request):
         # Get all gear values ordered by datetime
         all_data = gear_value.objects.all().order_by('-date', '-time')
 
-        # Assume the latest timestamp is the last data before stop
+        #latest time when the last data before stop
         if not all_data.exists():
             return JsonResponse({'error': 'No gear value data found.'}, status=404)
 
@@ -103,10 +103,10 @@ def download_gear_value(request):
         last_item = all_data.first()
         stop_time = make_aware(datetime.combine(last_item.date, last_item.time))
 
-        # Define the time range: 10 minutes before the stop
+        # Define the time range: 10 minutes before the machain stop
         start_time = stop_time - timedelta(minutes=10)
 
-        # Filter data within this 10-minute window
+        # Filter data within this 10m 
         filtered = []
         for item in all_data:
             item_datetime = make_aware(datetime.combine(item.date, item.time))
