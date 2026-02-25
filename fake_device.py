@@ -14,6 +14,7 @@ TOPICS = {
     "out1": "factory/gearbox1/out1/rpm",
     "out2": "factory/gearbox1/out2/rpm",
     "out3": "factory/gearbox1/out3/rpm",
+    "out4": "factory/gearbox1/out4/rpm",
 }
 
 client = mqtt.Client()
@@ -42,6 +43,7 @@ try:
         send(TOPICS["out1"], base * 0.6)
         send(TOPICS["out2"], base * 0.4)
         send(TOPICS["out3"], base * 0.25)
+        send(TOPICS["out4"], base * 0.25)
 
         time.sleep(2)
 

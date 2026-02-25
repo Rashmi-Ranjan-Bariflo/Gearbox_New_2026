@@ -34,6 +34,7 @@ MQTT_TOPICS = [
     "factory/gearbox1/out1/rpm",
     "factory/gearbox1/out2/rpm",
     "factory/gearbox1/out3/rpm",
+    "factory/gearbox1/out4/rpm",
 ]
 
 MQTT_USER = "mqttuser"
@@ -56,6 +57,7 @@ TOPIC_ALIAS = {
     "factory/gearbox1/out1/rpm": "Output1_rpm",
     "factory/gearbox1/out2/rpm": "Output2_rpm",
     "factory/gearbox1/out3/rpm": "Output3_rpm",
+    "factory/gearbox1/out4/rpm": "Output4_rpm",
 }
 
 
@@ -79,6 +81,7 @@ def calculate_ratio_from_row(row):
     out1 = row["out1"]
     out2 = row["out2"]
     out3 = row["out3"]
+    out4 = row["out4"]
     dt = row["time"]
 
     if input_rpm <= 0:
@@ -93,6 +96,7 @@ def calculate_ratio_from_row(row):
     r1 = round(out1 / input_rpm, 4)
     r2 = round(out2 / input_rpm, 4)
     r3 = round(out3 / input_rpm, 4)
+    r4 = round(out4 / input_rpm, 4)
 
     GearRatio.objects.create(
         timestamp=dt,
@@ -100,9 +104,11 @@ def calculate_ratio_from_row(row):
         output1_rpm=out1,
         output2_rpm=out2,
         output3_rpm=out3,
+        output4_rpm=out4,
         ratio1=r1,
         ratio2=r2,
-        ratio3=r3
+        ratio3=r3,
+        ratio4=r4,
     )
 
     print("📊 Ratio Saved:", dt)
@@ -218,6 +224,7 @@ def on_message(client, userdata, msg):
                 "out1": None,
                 "out2": None,
                 "out3": None,
+                "out4": None,
                 "time": device_dt
             }
 
@@ -240,6 +247,9 @@ def on_message(client, userdata, msg):
         elif channel == "Output3_rpm":
             row["out3"] = rpm
 
+        elif channel == "Output4_rpm":
+            row["out4"] = rpm
+
 
         # ================= CHECK =================
 
@@ -247,7 +257,8 @@ def on_message(client, userdata, msg):
             row["input"] is not None,
             row["out1"] is not None,
             row["out2"] is not None,
-            row["out3"] is not None
+            row["out3"] is not None,
+            row["out4"] is not None,
         ]):
 
             calculate_ratio_from_row(row)

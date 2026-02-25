@@ -6,95 +6,13 @@ from django.utils import timezone
 from gearapp.models import GearValue,GearRatio
 
 INPUT_CHANNEL="Input_rpm"
-OUTPUT_CHANNELS=["Output1_rpm","Output2_rpm","Output3_rpm"]
+OUTPUT_CHANNELS=["Output1_rpm","Output2_rpm","Output3_rpm","Output4_rpm"]
 TIME_MATCH_WINDOW_MS=5000
 
 from django.db.models import F
 from django.db.models.functions import Abs
 from datetime import timedelta
 from django.utils import timezone
-
-
-# def calculate_and_store_ratio():
-
-#     window = timedelta(milliseconds=TIME_MATCH_WINDOW_MS)
-
-#     last_ratio = GearRatio.objects.order_by("-timestamp").first()
-
-#     if last_ratio:
-#         start_time = last_ratio.timestamp
-#     else:
-#         start_time = timezone.now() - timedelta(minutes=30)
-
-#     end_time = timezone.now()
-
-
-#     inputs = GearValue.objects.filter(
-#         channel=INPUT_CHANNEL,
-#         timestamp__gt=start_time,
-#         timestamp__lte=end_time,
-#         rpm__gt=0
-#     ).order_by("timestamp")
-
-
-#     for inp in inputs:
-
-#         start = inp.timestamp - window
-#         end = inp.timestamp + window
-
-#         outputs = {}
-
-
-#         for ch in OUTPUT_CHANNELS:
-
-#             outputs[ch] = (
-#                 GearValue.objects.filter(
-#                     channel=ch,
-#                     timestamp__range=(start, end),
-#                     rpm__gt=0
-#                 )
-#                 # Find nearest timestamp
-#                 .annotate(
-#                     diff=Abs(F("timestamp") - inp.timestamp)
-#                 )
-#                 .order_by("diff")
-#                 .first()
-#             )
-
-
-#         # Skip if any output missing
-#         if not all(outputs.values()):
-#             continue
-
-
-#         # Calculate ratios
-#         r1 = round(outputs["Output1_rpm"].rpm / inp.rpm, 4)
-#         r2 = round(outputs["Output2_rpm"].rpm / inp.rpm, 4)
-#         r3 = round(outputs["Output3_rpm"].rpm / inp.rpm, 4)
-
-
-#         # Save matched ratio
-#         GearRatio.objects.create(
-#             timestamp=inp.timestamp,
-
-#             input_rpm=inp.rpm,
-
-#             output1_rpm=outputs["Output1_rpm"].rpm,
-#             output2_rpm=outputs["Output2_rpm"].rpm,
-#             output3_rpm=outputs["Output3_rpm"].rpm,
-
-#             ratio1=r1,
-#             ratio2=r2,
-#             ratio3=r3
-#         )
-
-
-#         print(
-#             f"✅ Ratio Saved | "
-#             f"TS: {inp.timestamp} | "
-#             f"In: {inp.rpm} | "
-#             f"Out: {[o.rpm for o in outputs.values()]}"
-# )
 
 @csrf_exempt
 def gear_dashboard_view(request):
@@ -128,9 +46,11 @@ def gear_dashboard_view(request):
                 "output1_rpm":r.output1_rpm,
                 "output2_rpm":r.output2_rpm,
                 "output3_rpm":r.output3_rpm,
+                "output4_rpm":r.output4_rpm,
                 "ratio1":r.ratio1,
                 "ratio2":r.ratio2,
-                "ratio3":r.ratio3
+                "ratio3":r.ratio3,
+                "ratio4":r.ratio4
             } for r in ratio_data
         ]
 
@@ -210,9 +130,11 @@ def filter_gear_ratio(request):
             "output1_rpm":r.output1_rpm,
             "output2_rpm":r.output2_rpm,
             "output3_rpm":r.output3_rpm,
+            "output4_rpm":r.output4_rpm,
             "ratio1":r.ratio1,
             "ratio2":r.ratio2,
-            "ratio3":r.ratio3
+            "ratio3":r.ratio3,
+            "ratio4":r.ratio4
         } for r in data
     ]
 
@@ -277,9 +199,11 @@ def download_gear_ratio(request):
         "Output1 RPM",
         "Output2 RPM",
         "Output3 RPM",
+        "Output4 RPM",
         "Ratio1",
         "Ratio2",
-        "Ratio3"
+        "Ratio3",
+        "Ratio4"
     ])
 
     for r in rows:
@@ -289,9 +213,11 @@ def download_gear_ratio(request):
             r.output1_rpm,
             r.output2_rpm,
             r.output3_rpm,
+            r.output4_rpm,
             r.ratio1,
             r.ratio2,
-            r.ratio3
+            r.ratio3,
+            r.ratio4
         ])
 
     return response

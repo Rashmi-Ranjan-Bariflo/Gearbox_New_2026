@@ -1,11 +1,3 @@
-# from django.contrib import admin
-# from .models import gear_value
-
-# @admin.register(gear_value)
-# class  gear_valueAdmin(admin.ModelAdmin):
-#     list_display = ['date','time','value']
-
-
 from django.contrib import admin
 from .models import GearValue, HourlyGearValueStats, DailyGearValueStats, DataCycle, GearRatio
 @admin.register(GearValue)
@@ -29,4 +21,4 @@ class DataCycleAdmin(admin.ModelAdmin):
 
 @admin.register(GearRatio)
 class GearRatioAdmin(admin.ModelAdmin):
-    list_display = ('input_rpm', 'timestamp', 'output1_rpm', 'output2_rpm','output3_rpm','ratio1', 'ratio2', 'ratio3')
+    list_display = ('input_rpm', 'timestamp', 'output1_rpm', 'output2_rpm','output3_rpm', 'output4_rpm', 'ratio1', 'ratio2', 'ratio3', 'ratio4')

@@ -59,14 +59,14 @@ class GearRatio(models.Model):
     output1_rpm = models.FloatField(null=True, blank=True)
     output2_rpm = models.FloatField(null=True, blank=True)
     output3_rpm = models.FloatField(null=True, blank=True)
-
+    output4_rpm = models.FloatField(null=True, blank=True)
     ratio1 = models.FloatField(null=True, blank=True)
     ratio2 = models.FloatField(null=True, blank=True)
     ratio3 = models.FloatField(null=True, blank=True)
-
+    ratio4 = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return (f"{self.timestamp} | Input: {self.input_rpm} | "
-                f"Outputs: [{self.output1_rpm}, {self.output2_rpm}, {self.output3_rpm}] | "
-                f"Ratios: [{self.ratio1}, {self.ratio2}, {self.ratio3}]")
+                f"Outputs: [{self.output1_rpm}, {self.output2_rpm}, {self.output3_rpm}, {self.output4_rpm}] | "
+                f"Ratios: [{self.ratio1}, {self.ratio2}, {self.ratio3}, {self.ratio4}]")
