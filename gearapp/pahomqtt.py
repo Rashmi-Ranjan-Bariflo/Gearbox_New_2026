@@ -3,6 +3,7 @@ import sys
 import time
 import json
 import threading
+import traceback
 from datetime import datetime
 
 import paho.mqtt.client as mqtt
@@ -152,12 +153,14 @@ def parse_payload(payload):
     except:
         pass
 
-    # Plain float (fallback)
+    # Plain float (fallback) - use server time if no timestamp provided
     try:
         rpm = float(payload)
-        return None, rpm
+        ts = int(datetime.now().timestamp() * 1000)  # Current time in milliseconds
+        return ts, rpm
 
-    except:
+    except Exception as e:
+        print(f"❌ Failed to parse payload '{payload}': {e}")
         return None, None
 
 
@@ -166,15 +169,25 @@ def parse_payload(payload):
 def on_connect(client, userdata, flags, rc):
 
     if rc == 0:
-
         print("✅ MQTT Connected")
 
         for t in MQTT_TOPICS:
-            client.subscribe(t)
-            print("Subscribed:", t)
+            try:
+                client.subscribe(t)
+                print(f"✅ Subscribed: {t}")
+            except Exception as e:
+                print(f"❌ Failed to subscribe to {t}: {e}")
 
     else:
-        print("❌ MQTT Failed:", rc)
+        error_codes = {
+            1: "Incorrect protocol version",
+            2: "Invalid client identifier",
+            3: "Server unavailable",
+            4: "Bad username or password",
+            5: "Not authorised",
+        }
+        error_msg = error_codes.get(rc, f"Unknown error code {rc}")
+        print(f"❌ MQTT Connection Failed ({rc}): {error_msg}")
 
 
 def on_message(client, userdata, msg):
@@ -190,7 +203,7 @@ def on_message(client, userdata, msg):
         ts, rpm = parse_payload(payload)
 
         if rpm is None or ts is None:
-            print("❌ Invalid payload:", payload)
+            print(f"❌ Invalid payload: {payload} (ts={ts}, rpm={rpm})")
             return
 
 
@@ -288,7 +301,8 @@ def on_message(client, userdata, msg):
 
     except Exception as e:
 
-        print("❌ MQTT error:", e)
+        print(f"❌ MQTT error: {e}")
+        traceback.print_exc()
 
 
 # ================== MQTT Thread ==================
@@ -302,30 +316,62 @@ def mqtt_thread():
     client.on_connect = on_connect
     client.on_message = on_message
 
-
     try:
+        print(f"🔗 Connecting to MQTT broker {MQTT_BROKER}:{MQTT_PORT}...")
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
     except Exception as e:
-        print("MQTT connect error:", e)
-        return
-
+        print(f"❌ MQTT connect error: {e}")
+        traceback.print_exc()
+        raise
 
     client.loop_start()
 
-    print("🤖 MQTT Started")
-
+    print("🤖 MQTT Loop started")
 
     while True:
+        try:
+            diff = (timezone.now() - last_message_time).total_seconds()
 
-        diff = (timezone.now() - last_message_time).total_seconds()
+            print(f"⏱️  Last data: {diff:.1f}s ago")
 
-        print(f"Last data: {diff:.1f}s ago")
+            if diff > NO_DATA_THRESHOLD:
+                send_telegram("⚠️ MQTT: No data received")
 
-        if diff > NO_DATA_THRESHOLD:
-            send_telegram("⚠️ MQTT: No data received")
+            time.sleep(2)
+        except Exception as e:
+            print(f"❌ MQTT thread error: {e}")
+            traceback.print_exc()
+            time.sleep(2)
 
-        time.sleep(2)
+
+# ================== MQTT Connect (for Django Management Command) ==================
+
+def mqtt_connect():
+    """Start MQTT subscriber (for use in Django management command)"""
+    print("=" * 60)
+    print("🚀 MQTT SUBSCRIBER STARTING")
+    print("=" * 60)
+    print(f"📍 MQTT Broker: {MQTT_BROKER}:{MQTT_PORT}")
+    print(f"👤 Username: {MQTT_USER}")
+    print(f"📡 Topics: {len(MQTT_TOPICS)} subscriptions")
+    for topic in MQTT_TOPICS:
+        print(f"   - {topic}")
+    print("=" * 60)
+    
+    t1 = threading.Thread(target=mqtt_thread, daemon=False)  # Non-daemon to keep running
+    t1.start()
+    
+    # Keep the process running
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\n⛔ MQTT Connect stopped by user")
+    except Exception as e:
+        print(f"❌ MQTT Connect error: {e}")
+        traceback.print_exc()
+        raise
 
 
 # ================== Telegram Commands ==================
