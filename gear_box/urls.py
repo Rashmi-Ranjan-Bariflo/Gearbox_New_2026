@@ -9,5 +9,7 @@ urlpatterns = [
     path("download_gear_value/", download_gear_value, name="download_gear_value"),
     path("filter_gear_ratio/", filter_gear_ratio, name="filter_gear_ratio"),
     path("download_gear_ratio/", download_gear_ratio, name="download_gear_ratio"),
+    path("filter_gear_ratio1/", filter_gear_ratio1, name="filter_gear_ratio1"),
+
 ]
  

@@ -221,3 +221,47 @@ def download_gear_ratio(request):
         ])
 
     return response
+
+
+
+
+@csrf_exempt
+def filter_gear_ratio1(request):
+    if request.method != "GET":
+        return JsonResponse({"error": "Only GET allowed"}, status=405)
+
+    now        = timezone.now()
+    start_time = now - timedelta(days=3)
+
+    data = GearRatio.objects.filter(
+        timestamp__range=(start_time, now)
+    ).order_by("timestamp")
+
+    if not data.exists():
+        return JsonResponse({"error": "No ratio data found in last 3 days"}, status=404)
+
+    def safe_ratio(input_rpm, output_rpm):
+        if not output_rpm or output_rpm == 0:
+            return 0
+        return round(input_rpm / output_rpm, 4)
+
+    def safe_rpm(value):
+        return value if value is not None else 0
+
+    result = [
+        {
+            "timestamp":   r.timestamp.isoformat(),
+            "input_rpm":   safe_rpm(r.input_rpm),
+            "output1_rpm": safe_rpm(r.output1_rpm),
+            "output2_rpm": safe_rpm(r.output2_rpm),
+            "output3_rpm": safe_rpm(r.output3_rpm),
+            "output4_rpm": safe_rpm(r.output4_rpm),
+            "ratio1": safe_ratio(r.input_rpm, r.output1_rpm),
+            "ratio2": safe_ratio(r.input_rpm, r.output2_rpm),
+            "ratio3": safe_ratio(r.input_rpm, r.output3_rpm),
+            "ratio4": safe_ratio(r.input_rpm, r.output4_rpm),
+        }
+        for r in data
+    ]
+
+    return JsonResponse(result, safe=False)

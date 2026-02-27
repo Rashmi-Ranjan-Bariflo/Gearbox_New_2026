@@ -125,14 +125,14 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "https://gearbox.bc-pl.com",
+    "https://gearbox1.bc-pl.com",
     "http://localhost:5173",
 ]
 
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",  
-    "https://gearboxbg.bc-pl.com",   
+    "https://gearbox1bg.bc-pl.com",   
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
