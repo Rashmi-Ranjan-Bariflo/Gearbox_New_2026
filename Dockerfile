@@ -33,7 +33,7 @@ COPY all_commands.sh /app/all_commands.sh
 RUN chmod +x /app/all_commands.sh
 
 # Expose Django port
-EXPOSE 8000
+EXPOSE 8001
 
 # Run the startup script
 CMD ["/app/all_commands.sh"]

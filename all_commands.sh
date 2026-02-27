@@ -35,7 +35,7 @@ python3 manage.py run_mqtt &> /app/logs/mqtt.log &
 
 # Start Django server
 echo "Starting Django server..."
-python3 manage.py runserver 0.0.0.0:8000 &> /app/logs/django_server.log &
+python3 manage.py runserver 0.0.0.0:8001 &> /app/logs/django_server.log &
 
 # Keep container running
 wait

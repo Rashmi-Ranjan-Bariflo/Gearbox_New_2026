@@ -131,7 +131,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",  
+    "http://localhost:8001",  
     "https://gearbox1bg.bc-pl.com",   
 ]
 
